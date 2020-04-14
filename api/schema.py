@@ -11,5 +11,6 @@ schema = graphene.Schema(
   mutation=Mutation,
   types=[
     RankType
-  ]
+  ],
+  auto_camelcase=False
 )

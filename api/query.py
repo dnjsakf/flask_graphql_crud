@@ -3,25 +3,40 @@ import graphene
 
 from api.models import RankModel, RankType
 
+
+class InputSearchRank(graphene.InputObjectType):
+  mode = graphene.String()
+  name = graphene.String()
+  score = graphene.Int()
+  is_mobile = graphene.Boolean()
+
 # Query Field 정의
-class Query(graphene.ObjectType):  
+class Query(graphene.ObjectType):
   # 모든 랭킹 목록.
-  ranks = graphene.List(RankType)
-  
-  # 특정 모드에 대한 랭킹 목록.
-  ranks_for_mode = graphene.List(RankType, mode=graphene.String(required=True))
+  ranks = graphene.List(
+    RankType,
+    page=graphene.Int(default_value=1),
+    count_for_rows=graphene.Int(default_value=10),
+    order=graphene.List(graphene.String),
+    search=InputSearchRank()
+  )
   
   # 특정 랭킹에 대한 정보.
   rank = graphene.Field(RankType, id=graphene.String(required=True))
-
+  
   # MongoDB에서 모든 랭킹 목록을 조회
-  def resolve_ranks(parent, info):
-    return RankModel.objects.all()
+  def resolve_ranks(parent, info, page, count_for_rows, **kwargs):
+    order = kwargs.get("order") if "order" in kwargs else list()
+    search = kwargs.get("search") if "search" in kwargs else dict()
     
-  # MongoDB에서 특정 모드의 모든 랭킹 목록을 조회
-  def resolve_ranks_for_mode(parent, info, mode):
-    return RankModel.objects(mode=mode).all()
-
+    page = page if page > 0 else 1
+    count_for_rows = count_for_rows if count_for_rows > 0 else 10
+    skip = (page-1) * count_for_rows
+  
+    model = RankModel.objects(**search).order_by(*order).skip(skip).limit(count_for_rows)
+  
+    return model
+    
   # MongoDB에서 특정 랭킹을 조회.
   def resolve_rank(parent, info, id):
     return RankModel.objects.get(id=id)
