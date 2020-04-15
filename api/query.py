@@ -1,8 +1,9 @@
 # api/query.py
 import graphene
 
-from api.models import RankModel, RankType
-
+from graphene import relay
+from graphene_mongo import MongoengineConnectionField
+from api.models import RankModel, RankType, RankNode
 
 class InputSearchRank(graphene.InputObjectType):
   mode = graphene.String()
@@ -10,8 +11,17 @@ class InputSearchRank(graphene.InputObjectType):
   score = graphene.Int()
   is_mobile = graphene.Boolean()
 
+
 # Query Field 정의
 class Query(graphene.ObjectType):
+  # Connection Field
+  rank_node = RankNode.Field()
+
+  test = MongoengineConnectionField(RankType)
+
+  def resolve_tests(root, info):
+      return []
+
   # 모든 랭킹 목록.
   ranks = graphene.List(
     RankType,

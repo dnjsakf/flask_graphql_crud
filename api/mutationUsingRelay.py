@@ -4,9 +4,9 @@ import graphene
 from api.models import RankModel, RankType
 
 # Create Mutation 정의
-class CreateRank(graphene.Mutation):  
+class CreateRank(graphene.ClientIDMutation):  
   # 입력받을 파라미터 Field 정의
-  class Arguments:
+  class Input:
     mode = graphene.String(required=True)
     name = graphene.String(required=True)
     score = graphene.Int(required=True)
@@ -17,7 +17,8 @@ class CreateRank(graphene.Mutation):
   success = graphene.Boolean()
   
   # 실행할 Mutation 정의
-  def mutate(root, info, **input):
+  @classmethod
+  def mutate_and_get_payload(cls, root, info, **input):
     # MongoDB Model 생성
     model = RankModel(
       mode=input.get("mode"),
@@ -41,9 +42,9 @@ class InuptUpdateRankData(graphene.InputObjectType):
   is_mobile = graphene.Boolean()
     
 # Update Mutation 정의
-class UpdateRank(graphene.Mutation):  
+class UpdateRank(graphene.ClientIDMutation):  
   # 입력받을 파라미터 Field 정의
-  class Arguments:
+  class Input:
     mode = graphene.String(required=True)
     name = graphene.String(required=True)
     data = InuptUpdateRankData(required=True)
@@ -53,7 +54,8 @@ class UpdateRank(graphene.Mutation):
   success = graphene.Boolean()
 
   # 실행할 Mutation 정의
-  def mutate(root, info, mode, name, data):
+  @classmethod
+  def mutate_and_get_payload(cls, root, info, mode, name, data):
     # 수정할 MongoDB Model 조회
     model = RankModel.objects(
       mode=mode, 
@@ -80,16 +82,17 @@ class UpdateRank(graphene.Mutation):
 
     
 # Delete Mutation 정의
-class DeleteRank(graphene.Mutation):
+class DeleteRank(graphene.ClientIDMutation):
   # 입력받을 파라미터 Field 정의
-  class Arguments:
+  class Input:
     mode = graphene.String(required=True)
     name = graphene.String(required=True)
     
   # 반환 Field 정의
   success = graphene.Boolean()
 
-  def mutate(root, info, mode, name):
+  @classmethod
+  def mutate_and_get_payload(cls, root, info, mode, name):
     # MongoDB에서 삭제
     RankModel.objects(
       mode=mode, 
@@ -109,23 +112,62 @@ class DeleteRank(graphene.Mutation):
 
 
 # Using Relay
-class UploadFile(graphene.Mutation):
-  class Arguments:
+class UploadFile(graphene.ClientIDMutation):
+  class Input:
     pass
 
   success = graphene.Boolean()
 
-  def mutate(root, info, **input):
+  @classmethod
+  def mutate_and_get_payload(cls, root, info, **input):
     request = info.context
 
     # files = request.FILES
 
     return UploadFile(success=True)
-    
 
 # Mutation Field 정의
-class Mutation(graphene.ObjectType):
+class MutationUsingRelay(graphene.ObjectType):
   create_rank = CreateRank.Field()
   update_rank = UpdateRank.Field()
   delete_rank = DeleteRank.Field()
-  upload_file = UploadFile.Field()
+
+
+'''
+mutation {
+	create_rank(
+    input: {
+      mode: "3x3"
+      name: "dochi"
+      score: 100
+    }
+  ){
+    rank {
+      id
+      name
+    }
+  } 
+	update_rank(
+    input: {
+      mode: "3x3"
+      name: "dochi"
+      data: {
+        score: 1000
+        is_mobile: false
+      }
+    }
+  ){
+    rank {
+      id
+      name
+    }
+  }
+  delete_rank(
+    input: {
+      mode: "3x3"
+      name: "dochi"
+    }){
+    success
+  }
+}
+'''
