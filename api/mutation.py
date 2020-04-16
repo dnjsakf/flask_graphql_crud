@@ -1,7 +1,9 @@
 # api/mutation.py
 import datetime
 import graphene
-from api.models import RankModel, RankType
+
+from api.models import RankModel
+from api.types import RankType
 
 # Create Mutation 정의
 class CreateRank(graphene.Mutation):  

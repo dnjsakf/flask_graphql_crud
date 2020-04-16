@@ -3,14 +3,15 @@ import graphene
 
 from api.query import Query
 from api.mutation import Mutation
-from api.models import RankType
+from api.types import RankType, RankModeType
 
 # Schema 생성
 schema = graphene.Schema(
   query=Query,
   mutation=Mutation,
   types=[
-    RankType
+    RankType,
+    RankModeType
   ],
   auto_camelcase=False
 )
