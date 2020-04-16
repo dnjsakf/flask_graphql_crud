@@ -1,0 +1,80 @@
+
+query mode_edges_Query {
+  modes_edges(mode: "3x3"){
+    edges {
+      node {
+        id
+        mode
+        ranking(
+          page: 1
+          count_for_rows: 3
+          order: [
+            "-score"
+          ]
+        ) {
+          edge_count
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+          }
+          edges {
+            cursor
+            node {
+              id
+              name
+              score
+              is_mobile
+              reg_dttm
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+query modesQuery {
+  modes(mode: "4x4") {
+    id
+    mode
+    ranking(
+      page: 334
+      count_for_rows: 3
+      order: [
+        "-score"
+      ]
+    ) {
+      total_count
+      edge_count
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+      }
+      edges {
+        node {
+          name
+          score
+          is_mobile
+          reg_dttm
+        }
+      }
+    } 
+  }
+}
+
+
+
+query ranksQuery {
+	ranks_test {
+    total_count
+    edge_count
+    edges {
+      node {
+        id
+      }
+    }
+  }
+}
+
+
